@@ -118,3 +118,29 @@ linreg.gs<- function(Y,X){
   }
 }
 
+#===============================================================================#
+
+#' Linear regression with Lapack's QR solver \code{dqrls}
+#'
+#' This function implements linear regression using QR decomposition.
+#' Lapack fortran subroutine \code{dqrls} is called in C for this purpose.
+#'
+#' @param Y vector of outcome variable
+#' @param X matrix of covariates
+#' @return coefs vector of coefficients
+#'
+#' @examples
+#' linreg.qr(women$height,women$weight)
+#' @useDynLib RdotC linreg_qr
+#' @export
+
+linreg.qr<- function(Y,X)
+{
+  X = as.matrix(cbind(1,X)) # add intercept term
+  n = as.integer(nrow(X)); p = as.integer(ncol(X)); ny = 1; tol=1e-7
+  X = as.double(X); Y = as.double(Y); ny = as.integer(ny); tol = as.double(tol)
+  ans=.C("linreg_qr",X,n,p,Y,ny,tol,coefs=double(p),residuals=double(n),double(n),
+         integer(ny),jpvt=integer(p),double(p),double(as.integer(2*p)))
+  list(coefs=ans$coefs,residuals=ans$residuals,jpvt=ans$jpvt)
+}
+

@@ -334,7 +334,20 @@ void SOR( double *A, double *b, double *phi, int *n){
   }
 }
 
+//****************************************************************************//
+void linreg_qr(double *x, int *n, int *p, double *y, int *ny,
+             double *tol, double *b, double *rsd,
+             double *qty, int *k,
+             int *jpvt, double *qraux, double *work)
+{
+  F77_CALL(dqrls)(x, n, p, y, ny,tol, b, rsd, qty, k, jpvt, qraux, work);
+}
+//****************************************************************************//
 
+
+
+
+//****************************************************************************//
 
 // linear regression with the conjugate gradient solver
 void linreg_cg(double *Y, double *X, double *coefs, int *nrX, int *ncX, double *XX, double *XY, double *r, double *p, double *vec)

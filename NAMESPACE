@@ -2,7 +2,9 @@
 
 export(linreg.cg)
 export(linreg.gs)
+export(linreg.qr)
 export(linreg.sor)
 useDynLib(RdotC,linreg_cg)
 useDynLib(RdotC,linreg_gs)
+useDynLib(RdotC,linreg_qr)
 useDynLib(RdotC,linreg_sor)
