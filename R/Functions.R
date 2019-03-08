@@ -144,3 +144,33 @@ linreg.qr<- function(Y,X)
   list(coefs=ans$coefs,residuals=ans$residuals,jpvt=ans$jpvt)
 }
 
+#===============================================================================#
+
+#' Linear regression with Coordinate descent
+#'
+#' This function implements linear regression using the coordinate descent
+#' algorithm. This minimises the sum of squares with respect to each parameter
+#' at a time holding others fixed.
+#'
+#' @param Y vector of outcome variable
+#' @param X matrix of covariates
+#' @return coefs vector of coefficients
+#'
+#' @examples
+#' linreg.coord(women$height,women$weight)
+#' @useDynLib RdotC linreg_cord
+#' @export
+
+linreg.coord<- function(Y,X){
+  if(is.numeric(Y)&&is.numeric(X)){
+    X = as.matrix(cbind(1,X)) # add intercept term
+    ncX = as.integer(ncol(X)); nrX = as.integer(nrow(X))
+    ans=.C("linreg_cord",as.double(Y),as.double(X),coefs=double(ncX),nrX,ncX,
+           Xdot=double(ncX),double(nrX),PACKAGE = "RdotC")
+    list(coefs=ans$coefs)
+  }else{
+    stop("Data input must be numeric.")
+  }
+}
+
+#===============================================================================#

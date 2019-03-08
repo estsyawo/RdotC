@@ -82,6 +82,22 @@ void matply_xyt(double *x, double *y, double *xyt, int *nrx, int *ncx, int *nry)
   }
 }
 
+// take product xa*xb excluding column ica in xa and row ica in xb
+void matply_sk1(double *xa, double *xb,double *xab, int *nra, int *nca,int *ncb, int *ica)
+{
+  double sum ;
+  for(int i=0; i< *nra;i++){
+    for (int j=0; j<*ncb; j++) {
+      sum = 0.0;
+      for (int k=0; k<*nca; k++) {
+        if (k!=*ica) { //skip column ica in xa and row ica in xb
+          sum =  (double) (sum + (xa[ k*(*nra)+i])*(xb[ j*(*nca)+k])) ;
+        }
+      }
+      xab[ j*(*nra)+i] = sum ;
+    }
+  }
+}
 
 /*
 Take the transpose of a matrix a, store in atrans,
@@ -107,6 +123,20 @@ double dotprod(double *a, double *b, int *n)
   }
   return ans;
 }
+
+// compute dot products of two columns taken from matrices a and b of nr
+// number of rows each. column indices are ica and icb
+double dotprod_col_ex(double *a, double *b, int *nr, int *ica, int *icb)
+{
+  int i;
+  double ans;
+  ans = 0.0;
+  for (i=0; i<*nr; i++) {
+    ans += a[(*ica-1)*(*nr)+i]*b[(*icb-1)*(*nr)+i];
+  }
+  return ans;
+}
+
 
 // take the product of a scalar and matrix/vector ax
 void matply_ax(double *x, double *a, double *ax, int *n)
@@ -378,3 +408,59 @@ void linreg_sor(double *Y, double *X, double *coefs, int *nrX, int *ncX, double 
     matply_xty(X, Y, XY, nrX, ncX, &ncY); // take X'Y
     SOR(XX, XY, coefs, ncX); // solve X'X*beta = X'Y
 }
+//****************************************************************************//
+
+
+
+
+//****************************************************************************//
+// linear regression by coordinate descent
+void linreg_cord(double *Y, double *X, double *coefs, int *nrX, int *ncX, double *Xdot, double *ervec)
+{
+  double az = 1e-20, tol = 1e-07,RSS0,RSS1,dev,dr;
+  int ncY=1, k=0,j,id,maxk = 2000;
+
+  // compute column-wise sum-of-squares
+  for (j=2; j<=*ncX; j++) {
+    Xdot[j-1]=dotprod_col_ex(X, X, nrX, &j, &j);
+  }//end for
+  Xdot[0] = (double) *nrX; //intercept of 1's sums squares to nrX
+  // compute initial sum of squared of errors
+  matply(X, coefs, ervec, nrX, ncX, &ncY); //compute ervec = X*coefs
+  vecsub(Y, ervec, ervec, nrX); // compute ervec <-- Y-ervec
+  RSS0=dotprod(ervec, ervec, nrX); // compute initial residual sum of squares (RSS0)
+
+  // commence iteration
+  for(;;)
+  {
+    k+=1; //increment counter by 1
+    for (j=0; j<*ncX; j++){
+      // compute X*coefs excluding column j in X and element j in coefs
+      matply_sk1(X, coefs,ervec, nrX, ncX, &ncY, &j); // ervec = X[,-j]*coef[-j]
+      vecsub(Y, ervec, ervec, nrX); // compute ervec <-- Y-ervec
+      id = j+1; // dotprod_col_ex() needs id, that counts from 1,..,ncX
+      dr=dotprod_col_ex(ervec, X, nrX, &ncY, &id); // compute dot(ervec,X[,j])
+      coefs[j] = dr/Xdot[j]; // update coefs
+    }// end for j
+
+    // compute sum of squared residuals
+    matply(X, coefs, ervec, nrX, ncX, &ncY); //compute ervec = X*coefs
+    vecsub(Y, ervec, ervec, nrX); // compute ervec <-- Y-ervec
+    RSS1=dotprod(ervec, ervec, nrX); // compute residual sum of squares (RSS1)
+
+    // compute deviation
+    dev = (RSS0-RSS1)/(az + RSS0);
+
+    // check for convergence
+    if (dev<=tol) {
+      break;
+    }
+    if (k>=maxk) {
+      Rprintf("Warning: maximum number of iterations reached. \n");
+      break;
+    }
+    RSS0 = RSS1; //update RSS0
+  }// end for(;;)
+
+}
+
