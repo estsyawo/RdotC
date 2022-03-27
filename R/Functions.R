@@ -172,5 +172,50 @@ linreg.coord<- function(Y,X){
     stop("Data input must be numeric.")
   }
 }
+#===============================================================================#
+#' Kernel matrix Esc6
+#'
+#' This function computes the Kernel matrix of Escanciano 2006.
+#'
+#' @param Z n by pz matrix of instruments Z
+#' @return n by n kernel matrix
+#'
+#' @examples
+#' set.seed(12); Z = rnorm(5); Z=cbind(Z,abs(Z))
+#' Kern.fun_Esc6(Z)
+#' @useDynLib RdotC Kern_Esc
+#' @export
 
+Kern.fun_Esc6<- function(Z)
+{
+  Z = as.matrix(Z) # add intercept term
+  n = as.integer(nrow(Z)); p = as.integer(ncol(Z))
+  Z = as.double(Z); p = as.integer(p)
+  Omg = as.double(matrix(0.0,n,n))
+  ans=.C("Kern_Esc",Z,Omg=Omg,n,p)
+  matrix(ans$Omg,n,n)
+}
+#===============================================================================#
+#' Kernel matrix DL
+#'
+#' This function computes the Kernel matrix of Dominguez & Lobato 2004.
+#'
+#' @param Z n by pz matrix of instruments Z
+#' @return n by n kernel matrix
+#'
+#' @examples
+#' set.seed(12); Z = rnorm(5); Z=cbind(Z,abs(Z))
+#' Kern.fun_DL(Z)
+#' @useDynLib RdotC Kern_DL
+#' @export
+
+Kern.fun_DL<- function(Z)
+{
+  Z = as.matrix(Z) # add intercept term
+  n = as.integer(nrow(Z)); p = as.integer(ncol(Z))
+  Z = as.double(Z); p = as.integer(p)
+  Omg = as.double(matrix(0.0,n,n))
+  ans=.C("Kern_DL",Z,Omg=Omg,n,p)
+  matrix(ans$Omg,n,n)
+}
 #===============================================================================#

@@ -6,6 +6,8 @@
  */
 
 /* .C calls */
+extern void Kern_DL(void *, void *, void *, void *);
+extern void Kern_Esc(void *, void *, void *, void *);
 extern void linreg_cg(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void linreg_cord(void *, void *, void *, void *, void *, void *, void *);
 extern void linreg_gs(void *, void *, void *, void *, void *, void *, void *);
@@ -13,16 +15,18 @@ extern void linreg_qr(void *, void *, void *, void *, void *, void *, void *, vo
 extern void linreg_sor(void *, void *, void *, void *, void *, void *, void *);
 
 static const R_CMethodDef CEntries[] = {
-  {"linreg_cg",   (DL_FUNC) &linreg_cg,   10},
-  {"linreg_cord", (DL_FUNC) &linreg_cord,  7},
-  {"linreg_gs",   (DL_FUNC) &linreg_gs,    7},
-  {"linreg_qr",   (DL_FUNC) &linreg_qr,   13},
-  {"linreg_sor",  (DL_FUNC) &linreg_sor,   7},
-  {NULL, NULL, 0}
+    {"Kern_DL",     (DL_FUNC) &Kern_DL,      4},
+    {"Kern_Esc",    (DL_FUNC) &Kern_Esc,     4},
+    {"linreg_cg",   (DL_FUNC) &linreg_cg,   10},
+    {"linreg_cord", (DL_FUNC) &linreg_cord,  7},
+    {"linreg_gs",   (DL_FUNC) &linreg_gs,    7},
+    {"linreg_qr",   (DL_FUNC) &linreg_qr,   13},
+    {"linreg_sor",  (DL_FUNC) &linreg_sor,   7},
+    {NULL, NULL, 0}
 };
 
 void R_init_RdotC(DllInfo *dll)
 {
-  R_registerRoutines(dll, CEntries, NULL, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
+    R_registerRoutines(dll, CEntries, NULL, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

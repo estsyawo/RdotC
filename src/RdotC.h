@@ -2,6 +2,7 @@
 #include <Rinternals.h>
 #include <math.h>
 #define absval(x) ((x) >=0.0 ? (x):(-(x)))
+#define signum(x) ((x) >=0.0 ? (1):(-(1)))
 
 // declare function prototypes.
 void linreg_cg(double *Y, double *X, double *coefs, int *nrX, int *ncX, double *XX, double *XY, double *r, double *p, double *vec);
@@ -36,3 +37,5 @@ double norm_max(double *x, int *n);
 void gauss_seidel( double *A, double *b, double *phi, int *n);
 void conjgrad(double *A, double *b, double *X, int *n, double *r, double *p, double *vec);
 void SOR( double *A, double *b, double *phi, int *n);
+void Kern_Esc(double *z, double *Omg, int *n, int *ncz);
+void Kern_DL(double *z, double *Omg, int *n, int *ncz);
